@@ -6,7 +6,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    //token存储在vuex,若无法取到则为空
+    // token存储在vuex,若无法取到则为空
       tokenInfo:getItem("token")||{}
   },
   mutations: {

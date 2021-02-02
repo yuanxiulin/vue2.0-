@@ -8,7 +8,7 @@
       ref="ruleForm"
       class="demo-ruleForm"
     >
-      <el-form-item label="用户名" prop="name">
+      <el-form-item label="用户名" prop="name" v-if="item ? true : false">
         <el-input
           type="text"
           v-model="ruleForm.name"
@@ -16,12 +16,15 @@
           maxlength="4"
         ></el-input>
       </el-form-item>
+      <el-form-item label="手机号" prop="phone">
+        <el-input v-model.number="ruleForm.phone" maxlength="11"></el-input>
+      </el-form-item>
       <el-form-item label="密码" prop="password">
         <el-input
           type="password"
           v-model="ruleForm.password"
           autocomplete="off"
-          maxlength="8"
+          maxlength="9"
         ></el-input>
       </el-form-item>
       <el-form-item class="section_class">
@@ -35,6 +38,9 @@
 </template>
 <script>
 // import {mapMutations} from 'vuex'
+// import Verify from 'vue2-verify'  //图形验证码
+// import{ setItem, getItem}from '../utils/storage'
+
 export default {
   data() {
     let patter = /^[\u4e00-\u9fa5]+$/; //验证中文
@@ -60,7 +66,7 @@ export default {
       if (!patters.test(value)) {
         return callback(new Error("请输入数字"));
       } else if (value.length < 8) {
-        return callback(new Error("请输入8位密码"));
+        return callback(new Error("请输入9位密码"));
       } else {
         callback();
       }
@@ -68,57 +74,63 @@ export default {
 
     return {
       ruleForm: {
-        name: "",
-        password: "",
+        // name: "袁袁",
+        password: "987456321",
+        phone:"15158817870"
+
       },
+      item:false,
       rules: {
-        name: [{ validator: validateName, trigger: "blur" }],
+        // name: [{ validator: validateName, trigger: "blur" }],
         password: [{ validator: validatePass, trigger: "blur" }],
+
       },
     };
   },
+
   created() {},
   methods: {
     // ...mapMutations(['changeLogin']),
 
     submitForm(formName) {
-      this.$refs[formName].validate((valid) => {
+      this.$refs[formName].validate(async (valid) => {
         //async和await用法
         if (valid) {
-          const name = this.ruleForm.name;
+          // const name = this.ruleForm.name;
           const password = this.ruleForm.password;
-    
-          this.$axios({
+          const phone = this.ruleForm.phone;
+          await this.$axios({
             url: "/login",
             method: "post",
             data: {
-              username: name,
-              password: password,
+              // username: this.$md5(name),
+              loginName: phone,//密码加密
+              passwordMd5: this.$md5(password),//密码加密
+
             },
           })
             .then((res) => {
-              // console.log(res.data.status);
-              if (res.data.status === 1) {
-                const token=res.data.token;
+              console.log(res);
+              if (res.resultCode === 200) {
+                const token=res.data;
                 console.log(token);
+
                 this.$store.commit("loginToken",token)
-                // window.sessionStorage.setItem('token',JSON.stringify(token));//保存token
-                this.$router.push("/Home");
+                this.$router.push("/home");
                 this.$message({
-                  message: res.data.msg,
+                  message: res.message,
                   type: "success",
                 });
-     
               }
-              if (res.data.status === 0) {
+              if (res.resultCode === 0) {
                 this.$message({
-                  message: res.data.msg,
+                  message: res.message,
                   type: "warning",
                 });
               }
             })
             .catch((err) => {
-              this.$message.error("服务器故障,请稍后重试");
+              this.$message.error("用户名或密码输入有误");
             });
         } else {
           alert("输入不能为空");

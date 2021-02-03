@@ -107,7 +107,7 @@ export default {
           const password = this.ruleForm.password;
           const phone = this.ruleForm.phone;
         this.$axios({
-            url: "/register",
+            url: "/user/register",
             method: "post",
             data: {
               // loginName: this.$md5(name),

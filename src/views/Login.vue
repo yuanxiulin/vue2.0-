@@ -100,9 +100,10 @@ export default {
           const password = this.ruleForm.password;
           const phone = this.ruleForm.phone;
           await this.$axios({
-            url: "/login",
+            url: "/user/login",
             method: "post",
             data: {
+              
               // username: this.$md5(name),
               loginName: phone,//密码加密
               passwordMd5: this.$md5(password),//密码加密
